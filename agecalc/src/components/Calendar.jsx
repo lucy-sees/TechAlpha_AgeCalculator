@@ -4,7 +4,6 @@ import { Container, Row, Col } from 'react-bootstrap';
 import 'react-calendar/dist/Calendar.css'; 
 
 export const CalendarPage = () => {
-    // State to store the selected date
     const [date, setDate] = useState(new Date());
 
     return (
@@ -12,13 +11,14 @@ export const CalendarPage = () => {
             <Row className="justify-content-center mt-5">
                 <Col md={6}>
                     <h2>Calendar</h2>
-                    <div className='calendar-container'>
+                    <div className="calendar-container">
                         <Calendar
                             onChange={setDate}
                             value={date}
+                            activeStartDate={new Date()}
                         />
                     </div>
-                    <p className='text-center'>
+                    <p className="text-center">
                         <strong>Selected Date:</strong> {date.toDateString()}
                     </p>
                 </Col>

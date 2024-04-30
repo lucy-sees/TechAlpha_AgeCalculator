@@ -1,67 +1,82 @@
 import React, { useEffect, useState } from 'react';
+import { Container, Spinner, Alert, Row, Col, Card } from 'react-bootstrap';
 
 const apiUrl = process.env.REACT_APP_API_URL;
 const apiKey = process.env.REACT_APP_API_KEY;
 
-const Quotes = () => {
-  const [quotes, setQuotes] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
+export const Quotes = () => {
+    const [quoteData, setQuoteData] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
+    const [isError, setIsError] = useState(false);
 
-  const getData = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'X-Api-Key': apiKey,
-          'Content-Type': 'application/json',
-        },
-      });
-      const data = await response.json();
-      setQuotes(data[0]);
-      setIsLoading(false);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-    } catch (error) {
-      setIsError(true);
+    const fetchData = async () => {
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'X-Api-Key': apiKey,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+            setQuoteData(data[0]);
+            setIsLoading(false);
+        } catch (error) {
+            setIsError(true);
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    // Display loading spinner or error message
+    if (isLoading) {
+        return (
+            <Container className="mt-3">
+                <Row className="justify-content-center">
+                    <Spinner animation="border" variant="primary" />
+                </Row>
+            </Container>
+        );
     }
-  };
 
-  useEffect(() => {
-    getData();
-  }, []);
+    if (isError) {
+        return (
+            <Container className="mt-3">
+                <Alert variant="danger">
+                    There must be some error.
+                </Alert>
+            </Container>
+        );
+    }
 
-  const message = isError ? 'There must be some error' : 'Here\'s a quote...';
-  if (isLoading || isError) {
-    return <p className="message">{message}</p>;
-  }
-  return (
-    <div className="container">
-      <div className="quote-container">
-        <h2>Quote</h2>
-        <ul className="quotesList">
-          <li key={quotes.id}>
-            <span className="quote-text">
-              {' "'}
-              {quotes.quote}
-              {'" '}
-            </span>
-            <span className="quote-text quote-author">
-              Author:
-              {' '}
-              {quotes.author}
-            </span>
-            <span className="quote-text quote-category">
-              Category:
-              {quotes.category}
-            </span>
-          </li>
-        </ul>
-      </div>
-    </div>
-  );
+    // Display the quote
+    return (
+        <Container className="mt-3" id="quotes">
+            <Row className="justify-content-center">
+                <Col md={8}>
+                    <Card className="quote-container">
+                        <Card.Header as="h5">Quote</Card.Header>
+                        <Card.Body>
+                            <blockquote className="blockquote mb-0">
+                                <p className="quote-text">{`"${quoteData.quote}"`}</p>
+                                <footer className="blockquote-footer">
+                                    <cite title="Source Title" className="quote-author">{quoteData.author}</cite>
+                                    <br />
+                                    <small className="quote-category">Category: {quoteData.category}</small>
+                                </footer>
+                            </blockquote>
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
+        </Container>
+    );
 };
-
-export default Quotes;
